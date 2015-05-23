@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+
 namespace Microsoft.Framework.DependencyInjection.ServiceLookup
 {
     internal class ServiceScopeFactory : IServiceScopeFactory
@@ -12,9 +14,20 @@ namespace Microsoft.Framework.DependencyInjection.ServiceLookup
             _provider = provider;
         }
 
-        public IServiceScope CreateScope()
+        public IServiceScope CreateScope(Action<IServiceCollection> buildAdditionalServices = null)
         {
-            return new ServiceScope(new ServiceProvider(_provider));
+            ServiceProvider resultProvider;
+            if (buildAdditionalServices != null)
+            {
+                var additionalServices = new ServiceCollection();
+                buildAdditionalServices(additionalServices);
+                resultProvider = new ServiceProvider(_provider, additionalServices);
+            }
+            else
+            {
+                resultProvider = new ServiceProvider(_provider);
+            }
+            return new ServiceScope(resultProvider);
         }
     }
 }

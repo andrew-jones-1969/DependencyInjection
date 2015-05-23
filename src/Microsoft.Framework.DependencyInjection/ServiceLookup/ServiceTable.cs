@@ -15,6 +15,7 @@ namespace Microsoft.Framework.DependencyInjection.ServiceLookup
         private readonly Dictionary<Type, ServiceEntry> _services;
         private readonly Dictionary<Type, List<IGenericService>> _genericServices;
         private readonly ConcurrentDictionary<Type, Func<ServiceProvider, object>> _realizedServices = new ConcurrentDictionary<Type, Func<ServiceProvider, object>>();
+        private readonly ServiceTable _parentTable;
 
         public ServiceTable(IEnumerable<ServiceDescriptor> descriptors)
         {
@@ -41,6 +42,12 @@ namespace Microsoft.Framework.DependencyInjection.ServiceLookup
                     Add(descriptor.ServiceType, new Service(descriptor));
                 }
             }
+        }
+
+        public ServiceTable(ServiceTable parentTable, IEnumerable<ServiceDescriptor> serviceDescriptors)
+            : this(serviceDescriptors)
+        {
+            this._parentTable = parentTable;
         }
 
         public ConcurrentDictionary<Type, Func<ServiceProvider, object>> RealizedServices
@@ -75,6 +82,10 @@ namespace Microsoft.Framework.DependencyInjection.ServiceLookup
                         return _services.TryGetValue(serviceType, out entry);
                     }
                 }
+            }
+            if (_parentTable != null)
+            {
+                return _parentTable.TryGetEntry(serviceType, out entry);
             }
             return false;
         }

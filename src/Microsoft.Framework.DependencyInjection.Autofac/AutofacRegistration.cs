@@ -112,9 +112,17 @@ namespace Microsoft.Framework.DependencyInjection.Autofac
                 _lifetimeScope = lifetimeScope;
             }
 
-            public IServiceScope CreateScope()
+            public IServiceScope CreateScope(Action<IServiceCollection> buildAdditionalServices)
             {
-                return new AutofacServiceScope(_lifetimeScope.BeginLifetimeScope());
+                return new AutofacServiceScope(_lifetimeScope.BeginLifetimeScope(containerBuilder =>
+                {
+                    if (buildAdditionalServices != null)
+                    {
+                        var additionalServices = new ServiceCollection();
+                        buildAdditionalServices(additionalServices);
+                        Register(containerBuilder, additionalServices);
+                    }
+                }));
             }
         }
 

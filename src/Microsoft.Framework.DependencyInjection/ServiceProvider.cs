@@ -35,11 +35,18 @@ namespace Microsoft.Framework.DependencyInjection
             _table.Add(typeof(IEnumerable<>), new OpenIEnumerableService(_table));
         }
 
-        // This constructor is called exclusively to create a child scope from the parent
+        // This constructor is called exclusively to create a child scope from the parent with no additional services
         internal ServiceProvider(ServiceProvider parent)
         {
             _root = parent._root;
             _table = parent._table;
+        }
+
+        // This constructor is called exclusively to create a child scope from the parent with additional services
+        internal ServiceProvider(ServiceProvider parent, IEnumerable<ServiceDescriptor> serviceDescriptors)
+        {
+            _root = parent._root;
+            _table = new ServiceTable(parent._table, serviceDescriptors);
         }
 
         /// <summary>

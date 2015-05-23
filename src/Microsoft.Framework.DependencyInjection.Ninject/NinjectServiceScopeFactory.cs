@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ninject;
 using Ninject.Activation;
+using Ninject.Extensions.ChildKernel;
 using Ninject.Parameters;
 using Ninject.Syntax;
 
@@ -22,8 +23,16 @@ namespace Microsoft.Framework.DependencyInjection.Ninject
             _inheritedParameters = context.Parameters.Where(p => p.ShouldInherit);
         }
 
-        public IServiceScope CreateScope()
+        public IServiceScope CreateScope(Action<IServiceCollection> buildAdditionalServices)
         {
+            if (buildAdditionalServices != null)
+            {
+                var child = new ChildKernel(_resolver);
+                var additionalServices = new ServiceCollection();
+                buildAdditionalServices(additionalServices);
+                NinjectServiceBinder.BindServices(child, additionalServices);
+                return new NinjectServiceScope(child, _inheritedParameters);
+            }
             return new NinjectServiceScope(_resolver, _inheritedParameters);
         }
 

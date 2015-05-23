@@ -2,7 +2,8 @@
   "version": "1.0.0-*",
   "dependencies": {
     "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-    "Ninject": "3.0.1.10"
+    "Ninject": "3.0.1.10",
+    "Ninject.Extensions.ChildKernel": "3.0.0.5"
   },
   "frameworks": {
     "net45": { },

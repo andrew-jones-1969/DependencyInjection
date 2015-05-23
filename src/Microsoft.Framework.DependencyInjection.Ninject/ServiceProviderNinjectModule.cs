@@ -22,40 +22,7 @@ namespace Microsoft.Framework.DependencyInjection.Ninject
 
         public override void Load()
         {
-            foreach (var descriptor in _serviceDescriptors)
-            {
-                IBindingWhenInNamedWithOrOnSyntax<object> binding;
-
-                if (descriptor.ImplementationType != null)
-                {
-                    binding = Bind(descriptor.ServiceType).To(descriptor.ImplementationType);
-                }
-                else if (descriptor.ImplementationFactory != null)
-                {
-                    binding = Bind(descriptor.ServiceType).ToMethod(context =>
-                    {
-                        var serviceProvider = context.Kernel.Get<IServiceProvider>();
-                        return descriptor.ImplementationFactory(serviceProvider);
-                    });
-                }
-                else
-                {
-                    binding = Bind(descriptor.ServiceType).ToConstant(descriptor.ImplementationInstance);
-                }
-
-                switch (descriptor.Lifetime)
-                {
-                    case ServiceLifetime.Singleton:
-                        binding.InSingletonScope();
-                        break;
-                    case ServiceLifetime.Scoped:
-                        binding.InRequestScope();
-                        break;
-                    case ServiceLifetime.Transient:
-                        binding.InTransientScope();
-                        break;
-                }
-            }
+            NinjectServiceBinder.BindServices(this, _serviceDescriptors);
 
             Bind<IServiceProvider>().ToMethod(context =>
             {
